@@ -1,10 +1,24 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
+
+@app.route("/")
+def home():
+    return "Flask is running"
+    
+@app.route("/submittodoitem", methods=["GET"])
+def submit_todo_info():
+    return jsonify(
+        {
+            "message": "Send a POST request with JSON: { itemName, itemDescription }"
+        }
+    )
 
 @app.route("/submittodoitem", methods=["POST"])
 def submit_todo():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     itemName = data.get("itemName")
     itemDescription = data.get("itemDescription")
 
