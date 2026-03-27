@@ -12,6 +12,7 @@ The frontend is built to run inside a Docker container using Node 18 and exposes
 ## Prerequisites
 
 - **Docker** installed and running.
+- **Python 3** and `pip` (only if you want to run the backend locally).
 - Optionally **Node.js** and **npm** if you want to run the frontend without Docker.
 
 ## Running the Frontend with Docker
@@ -37,6 +38,47 @@ node server.js
 ```
 
 The app will start on port 3000 (or as configured in `server.js`).
+
+## Running the Backend Locally
+
+From the repository root:
+
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python app.py
+```
+
+The backend will start on `http://localhost:5000`.
+
+Quick check:
+
+```bash
+curl http://localhost:5000/
+```
+
+Submit a sample item:
+
+```bash
+curl -X POST http://localhost:5000/submittodoitem \
+  -H "Content-Type: application/json" \
+  -d '{"itemName":"Test","itemDescription":"Demo"}'
+```
+
+## Running the Backend with Docker
+
+From the repository root:
+
+```bash
+docker build -t my-backend ./backend
+docker run --rm -p 5000:5000 my-backend
+```
+
+The backend will be available at `http://localhost:5000`.
+
+Note for frontend + Docker: the frontend code calls `http://localhost:5000/...`. If the frontend is running inside a Docker container too, `localhost` will refer to that container, not the host. In that case, run the backend and frontend accordingly (or update the frontend URL to reach the backend container).
 
 ## Development Notes
 
