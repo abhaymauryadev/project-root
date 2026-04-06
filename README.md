@@ -80,6 +80,42 @@ The backend will be available at `http://localhost:5000`.
 
 Note for frontend + Docker: the frontend code calls `http://localhost:5000/...`. If the frontend is running inside a Docker container too, `localhost` will refer to that container, not the host. In that case, run the backend and frontend accordingly (or update the frontend URL to reach the backend container).
 
+# Kubernetes Deployment (Minikube)
+
+## Project Overview
+This project deploys a Flask backend and Node.js frontend using Kubernetes on Minikube.
+
+## Steps to Run
+
+### 1. Start Minikube
+minikube start
+
+### 2. Use Minikube Docker
+eval $(minikube docker-env)
+
+### 3. Build Images
+cd backend
+docker build -t flask-backend .
+
+cd ../frontend
+docker build -t node-frontend .
+
+### 4. Apply Kubernetes Config
+kubectl apply -f k8s/
+
+### 5. Check Pods
+kubectl get pods
+
+### 6. Check Services
+kubectl get services
+
+### 7. Open App
+minikube service frontend
+
+## Screenshots
+- Pods running
+- Services
+- Browser output
 ## Development Notes
 
 - **Environment variables**: Configure any required environment variables using a `.env` file or your preferred mechanism. Keep secrets out of version control.
