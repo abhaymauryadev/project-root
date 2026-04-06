@@ -109,13 +109,7 @@ kubectl get pods
 ### 6. Check Services
 kubectl get services
 
-### 7. Open App
-minikube service frontend
 
-## Screenshots
-- Pods running
-- Services
-- Browser output
 ## Development Notes
 
 - **Environment variables**: Configure any required environment variables using a `.env` file or your preferred mechanism. Keep secrets out of version control.
