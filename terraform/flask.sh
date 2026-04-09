@@ -1,12 +1,24 @@
+# #!/bin/bash
+# apt update -y
+
+# curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+# apt install -y nodejs git
+
+# cd /home/ubuntu
+# git clone https://github.com/abhaymauryadev/project-root.git
+# cd fullstack-app/frontend
+
+# npm install
+# nohup npm start &
+
+
 #!/bin/bash
 apt update -y
-
-curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-apt install -y nodejs git
+apt install -y python3 python3-pip git
 
 cd /home/ubuntu
-git clone https://github.com/abhaymauryadev/project-root.git
-cd fullstack-app/frontend
+git clone  https://github.com/abhaymauryadev/project-root.git
+cd fullstack-app/backend
 
-npm install
-nohup npm start &
+pip3 install flask
+nohup python3 app.py &
