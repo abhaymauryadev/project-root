@@ -1,5 +1,24 @@
+# Node / Next.js
 node_modules/
-.vscode/
+.next/
+out/
+dist/
+build/
+
+# Env
+.env
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Python
 __pycache__/
 *.pyc
-.env
+
+# IDE
+.vscode/
+
+# Logs
+*.log
