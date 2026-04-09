@@ -1,3 +1,19 @@
+resource "aws_instance" "fullstack" {
+  ami           = "ami-0ec10929233384c7f"
+  instance_type = "t3.micro"
+
+  key_name = var.key_name
+
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+
+  tags = {
+    Name = "Fullstack-EC2"
+  }
+}
+
+provider "aws" {
+  region = "us-east-1"
+}
 resource "aws_security_group" "web_sg" {
   name = "web_sg"
 
