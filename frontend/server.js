@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
 
 app.post("/submit", async (req, res) => {
     try {
-        await axios.post("http://54.86.135.91:5000/submittodoitem", {
+        await axios.post("http://204.236.215.28:5000/submittodoitem", {
             itemName: req.body.itemName,
             itemDescription: req.body.itemDescription
         });
