@@ -5,10 +5,10 @@ app = Flask(__name__)
 CORS(app)
 
 @app.route("/")
-def home():
-    return "Flask is running"
-    
-@app.route("/submittodoitem", methods=["GET"])
+def health():
+    return "healthy", 200
+
+@app.route("/api/submittodoitem", methods=["GET"])
 def submit_todo_info():
     return jsonify(
         {
@@ -16,7 +16,7 @@ def submit_todo_info():
         }
     )
 
-@app.route("/submittodoitem", methods=["POST"])
+@app.route("/api/submittodoitem", methods=["POST"])
 def submit_todo():
     data = request.get_json(silent=True) or {}
     itemName = data.get("itemName")
@@ -25,10 +25,6 @@ def submit_todo():
     print("Received:", itemName, itemDescription)
 
     return jsonify({"message": "Item Stored Successfully"})
-    
-@app.route("/")
-def health():
-    return "healthy", 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000 , debug=True)

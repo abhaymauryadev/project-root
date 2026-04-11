@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
 
 app.post("/submit", async (req, res) => {
     try {
-        await axios.post("http://flask-service/submittodoitem", {
+        await axios.post("http://app-lb-170881099.us-east-1.elb.amazonaws.com/api/submittodoitem", {
             itemName: req.body.itemName,
             itemDescription: req.body.itemDescription
         });

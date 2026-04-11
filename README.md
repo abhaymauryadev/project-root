@@ -1,19 +1,27 @@
 ## Project Overview
 
-This repository contains a simple full‑stack application with a Node.js‑based frontend (containerized via Docker) and a backend (e.g. Python/Node or another service) under active development.
+Full-stack todo application with Express.js frontend and Flask backend, deployed on AWS ECS with Application Load Balancer (ALB).
 
-The frontend is built to run inside a Docker container using Node 18 and exposes port 3000 by default.
+- **Frontend**: Node.js Express server (port 3000)
+- **Backend**: Python Flask API (port 5000)
+- **Infrastructure**: AWS ECS, ECR, ALB, VPC (IaC with Terraform)
 
 ## Repository Structure
 
-- **frontend**: Node.js application (served via `server.js`, port 3000).
-- **backend**: Backend service code and its virtual environment (if present).
+- **frontend/**: Node.js Express app, form submission to backend
+- **backend/**: Python Flask API with todo endpoints
+- **k8s/**: Kubernetes deployment manifests (optional)
+- **terraform/**: AWS infrastructure as code (ECS, ECR, ALB, VPC)
+- **scripts/**: Build and deployment automation
+- **docker-compose.yml**: Local development setup
 
 ## Prerequisites
 
-- **Docker** installed and running.
-- **Python 3** and `pip` (only if you want to run the backend locally).
-- Optionally **Node.js** and **npm** if you want to run the frontend without Docker.
+- **Docker** and **Docker Compose** installed
+- **AWS CLI** configured with credentials
+- **Terraform** (for infrastructure deployment)
+- **Python 3** and `pip` (local development)
+- **Node.js** and **npm** (local development)
 
 ## Running the Frontend with Docker
 
@@ -59,12 +67,18 @@ Quick check:
 curl http://localhost:5000/
 ```
 
-Submit a sample item:
+Submit a sample item (note the `/api/` prefix):
 
 ```bash
-curl -X POST http://localhost:5000/submittodoitem \
+curl -X POST http://localhost:5000/api/submittodoitem \
   -H "Content-Type: application/json" \
   -d '{"itemName":"Test","itemDescription":"Demo"}'
+```
+
+GET request to check expected format:
+
+```bash
+curl http://localhost:5000/api/submittodoitem
 ```
 
 ## Running the Backend with Docker
@@ -78,26 +92,123 @@ docker run --rm -p 5000:5000 my-backend
 
 The backend will be available at `http://localhost:5000`.
 
-Note for frontend + Docker: the frontend code calls `http://localhost:5000/...`. If the frontend is running inside a Docker container too, `localhost` will refer to that container, not the host. In that case, run the backend and frontend accordingly (or update the frontend URL to reach the backend container).
+## Troubleshooting
 
-# Kubernetes Deployment (Minikube)
+### Error connecting to backend
 
-## Project Overview
-This project deploys a Flask backend and Node.js frontend using Kubernetes on Minikube.
+**Issue**: Frontend receives "Error connecting to backend"
 
-## Steps to Run
+**Causes & Solutions**:
 
-### 1. Start Minikube
-minikube start
+1. **Incorrect API endpoint**: Ensure backend routes have `/api/` prefix
+   - Backend routes should be: `/api/submittodoitem`
+   - Frontend should call: `http://backend-url/api/submittodoitem`
 
-### 2. Use Minikube Docker
-eval $(minikube docker-env)
+2. **Backend not running**: Verify backend is accessible
+   ```bash
+   curl http://backend-url:5000/
+   ```
 
-### 3. Build Images
+3. **ALB health checks failing**: Check ECS target group
+   - Verify backend tasks are registered and healthy
+   - Check security groups allow inbound on port 5000
+
+4. **CORS issues**: Backend has CORS enabled with `flask_cors`
+
+5. **Network connectivity**: Verify frontend and backend are in same VPC/accessible to each other
+
+Note for frontend + Docker: the frontend code calls the backend API endpoint. Update the backend URL in `frontend/server.js` if needed for your environment.
+
+## Docker Compose (Local Development)
+
+Run both frontend and backend locally:
+
+```bash
+docker-compose up -d
+```
+
+- Frontend: http://localhost:3000
+- Backend: http://localhost:5000
+
+Stop services:
+
+```bash
+docker-compose down
+```
+
+## AWS ECS Deployment
+
+### 1. Build and Push Flask Backend to ECR
+
+```bash
 cd backend
-docker build -t flask-backend .
 
-cd ../frontend
+# Build image
+docker build -t flask-repo:latest .
+
+# Tag with ECR URL
+docker tag flask-repo:latest 669468173350.dkr.ecr.us-east-1.amazonaws.com/flask-repo:latest
+
+# Login to ECR
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 669468173350.dkr.ecr.us-east-1.amazonaws.com
+
+# Push to ECR
+docker push 669468173350.dkr.ecr.us-east-1.amazonaws.com/flask-repo:latest
+```
+
+### 2. Build and Push Express Frontend to ECR
+
+```bash
+cd frontend
+
+# Build image
+docker build -t express-repo:latest .
+
+# Tag with ECR URL
+docker tag express-repo:latest 669468173350.dkr.ecr.us-east-1.amazonaws.com/express-repo:latest
+
+# Push to ECR
+docker push 669468173350.dkr.ecr.us-east-1.amazonaws.com/express-repo:latest
+```
+
+### 3. Deploy to ECS
+
+Update ECS services to use new images:
+
+```bash
+# Update Flask backend service
+aws ecs update-service \
+  --cluster app-cluster \
+  --service flask-service \
+  --force-new-deployment \
+  --region us-east-1
+
+# Update Express frontend service
+aws ecs update-service \
+  --cluster app-cluster \
+  --service express-service \
+  --force-new-deployment \
+  --region us-east-1
+```
+
+## Terraform Infrastructure
+
+Deploy AWS infrastructure (VPC, ECS cluster, ALB, ECR):
+
+```bash
+cd terraform
+
+# Initialize Terraform
+terraform init
+
+# Plan deployment
+terraform plan
+
+# Apply configuration
+terraform apply
+```
+
+Outputs will include ALB endpoint URL.
 docker build -t node-frontend .
 
 ### 4. Apply Kubernetes Config

@@ -75,7 +75,7 @@ resource "aws_ecs_task_definition" "flask" {
   container_definitions = jsonencode([
     {
       name  = "flask"
-      image = "${aws_ecr_repository.flask_repo.repository_url}:latest"
+      image = "669468173350.dkr.ecr.us-east-1.amazonaws.com/flask-repo:latest"
 
       portMappings = [{
         containerPort = 5000
@@ -98,7 +98,7 @@ resource "aws_ecs_task_definition" "express" {
   container_definitions = jsonencode([
     {
       name  = "express"
-      image = "${aws_ecr_repository.express_repo.repository_url}:latest"
+      image = "669468173350.dkr.ecr.us-east-1.amazonaws.com/express-repo:latest"
 
       portMappings = [{
         containerPort = 3000
