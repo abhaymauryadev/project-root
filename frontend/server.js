@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
 
 app.post("/submit", async (req, res) => {
     try {
-        await axios.post("http://204.236.215.28:5000/submittodoitem", {
+        await axios.post("http://flask-service/submittodoitem", {
             itemName: req.body.itemName,
             itemDescription: req.body.itemDescription
         });
@@ -22,6 +22,6 @@ app.post("/submit", async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
+app.listen(3000, "0.0.0.0", () => {
     console.log("Frontend running on port 3000");
 });
