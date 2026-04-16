@@ -220,6 +220,109 @@ kubectl get pods
 ### 6. Check Services
 kubectl get services
 
+# CI/CD Pipeline (Jenkins + GitHub Webhook)
+
+## 🧠 Flow
+
+GitHub Push → Webhook → Jenkins → Build → Deploy to EC2/ECS
+
+------------------------------------------------------------------------
+
+## 🔹 Step 1: Install Required Jenkins Plugins
+
+-   SSH Agent Plugin
+-   Git Plugin
+-   Pipeline Plugin
+
+------------------------------------------------------------------------
+
+## 🔹 Step 2: Add SSH Key in Jenkins
+
+1.  Go to: Manage Jenkins → Credentials → Global → Add Credentials
+
+2.  Select:
+
+    -   Kind: SSH Username with private key
+    -   Username: ubuntu
+    -   Private Key: paste your .pem content
+
+3.  ID: ec2-key
+
+------------------------------------------------------------------------
+
+## 🔹 Step 3: Jenkins Pipeline
+
+Create `Jenkinsfile`:
+
+``` groovy
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Clone Repo') {
+            steps {
+                git 'https://github.com/abhaymauryadev/project-root.git'
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                sshagent(['ec2-key']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@100.27.212.72 << EOF
+
+                    cd project-root
+
+                    cd backend
+                    docker build -t backend .
+                    docker stop backend || true
+                    docker rm backend || true
+                    docker run -d -p 5000:5000 --name backend backend
+
+                    cd ../frontend
+                    docker build -t frontend .
+                    docker stop frontend || true
+                    docker rm frontend || true
+                    docker run -d -p 3000:3000 --name frontend frontend
+
+                    EOF
+                    '''
+                }
+            }
+        }
+    }
+}
+```
+
+------------------------------------------------------------------------
+
+## 🔹 Step 4: Setup Webhook (GitHub → Jenkins)
+
+Repo → Settings → Webhooks → Add Webhook
+
+Payload URL: https://`<your-ngrok-url>`{=html}/github-webhook/
+
+Example: https://upright-matter-unaltered.ngrok-free.dev/github-webhook/
+
+Content type: application/json
+
+Events: Just the push event
+
+------------------------------------------------------------------------
+
+## 🔹 Step 5: Enable Jenkins Trigger
+
+Enable: GitHub hook trigger for GITScm polling
+
+------------------------------------------------------------------------
+
+## 🌐 Ngrok Setup
+
+``` bash
+ngrok http 8080
+```
+
 
 ## Development Notes
 
